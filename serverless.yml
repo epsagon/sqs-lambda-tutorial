@@ -1,0 +1,21 @@
+service: sqs-lambda-tutorial
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: production
+  region: <region>
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+      Resource: arn:aws:sqs:<region>:<account>:TutorialSQS
+
+functions:
+  start-lambda:
+    handler: handler.start
+  end-lambda:
+    handler: handler.end
+    events:
+      - sqs: arn:aws:sqs:<region>:<account>:TutorialSQS
