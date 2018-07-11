@@ -1,21 +1,38 @@
 service: sqs-lambda-tutorial
 
+custom:
+  queueName: TutorialSQS
+
 provider:
   name: aws
   runtime: python3.6
   stage: production
-  region: <region>
+  region: eu-west-1
 
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "sqs:SendMessage"
-      Resource: arn:aws:sqs:<region>:<account>:TutorialSQS
+      Resource:
+        Fn::GetAtt: [ SQSQueue, Arn ]
+
 
 functions:
   start-lambda:
     handler: handler.start
+    environment:
+      SQS_URL:
+        Ref: SQSQueue
   end-lambda:
     handler: handler.end
     events:
-      - sqs: arn:aws:sqs:<region>:<account>:TutorialSQS
+      - sqs:
+          arn:
+            Fn::GetAtt: [ SQSQueue, Arn ]
+
+resources:
+  Resources:
+    SQSQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.queueName}
